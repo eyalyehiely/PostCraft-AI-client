@@ -10,7 +10,8 @@ import { Moon, User, Settings2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
-
+import { editProfile } from '@/services/profile/edit-profile'
+import { useAuth } from '@clerk/nextjs'
 
 export default function SettingsPage() {
   const { user } = useUser()
@@ -22,6 +23,17 @@ export default function SettingsPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [tempFirstName, setTempFirstName] = useState(firstName)
   const [tempLastName, setTempLastName] = useState(lastName)
+  const { getToken } = useAuth()
+
+  // Update state when user data is available
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || '')
+      setLastName(user.lastName || '')
+      setTempFirstName(user.firstName || '')
+      setTempLastName(user.lastName || '')
+    }
+  }, [user])
 
   // Avoid hydration mismatch
   useEffect(() => {
@@ -48,6 +60,11 @@ export default function SettingsPage() {
       // Here you would typically update the user's profile with Clerk
       setFirstName(tempFirstName)
       setLastName(tempLastName)
+      const token = await getToken()
+      if (!token) {
+        throw new Error('Not authenticated')
+      }
+      await editProfile({ firstName: tempFirstName, lastName: tempLastName }, token)
       setIsEditing(false)
       toast.success("Profile updated successfully")
     } catch (error) {
