@@ -10,12 +10,16 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { fetchPosts } from '@/services/posts/fetchPosts'
 import { Post } from '@/types/post'
-import { TrashIcon, PencilIcon, PlusIcon, XIcon, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react'
+import { TrashIcon, PencilIcon, PlusIcon, XIcon, ExternalLink, ChevronLeft, ChevronRight, GlobeIcon, LockIcon, ChevronDown } from 'lucide-react'
 import { editPost } from '@/services/posts/edit'
 import { toast } from 'sonner'
 import dynamic from 'next/dynamic'
 import { deletePost } from '@/services/posts/delete'
-
+import { savePost } from '@/services/posts/savePost'
+import { generateContent } from '@/services/posts/generate'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 // Dynamically import Quill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
@@ -31,6 +35,16 @@ function Posts() {
   const [isSaving, setIsSaving] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const postsPerPage = 5
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [topic, setTopic] = useState('')
+  const [style, setStyle] = useState('')
+  const [content, setContent] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
+  const [showGeneratedContent, setShowGeneratedContent] = useState(false)
+  const [showSpecialRequests, setShowSpecialRequests] = useState(false)
+  const [wordLimit, setWordLimit] = useState('')
+  const [pronoun, setPronoun] = useState<'first' | 'second' | 'third' | ''>('')
 
   // Quill modules configuration
   const modules = {
@@ -98,8 +112,84 @@ function Posts() {
     }
   }
 
+  const typeText = (text: string) => {
+    let index = 0
+    setIsTyping(true)
+    setContent('')
+    setShowGeneratedContent(true)
+
+    const typingInterval = setInterval(() => {
+      if (index < text.length) {
+        setContent(prev => prev + text[index])
+        index++
+      } else {
+        clearInterval(typingInterval)
+        setIsTyping(false)
+      }
+    }, 30)
+  }
+
+  const handleGenerate = async () => {
+    if (!topic || !style) {
+      toast.error('Please fill in both topic and writing style')
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const token = await getToken()
+      if (!token) {
+        throw new Error('Not authenticated')
+      }
+      
+      const generatedContent = await generateContent({ 
+        topic, 
+        style, 
+        token,
+        wordLimit: wordLimit ? parseInt(wordLimit) : undefined,
+        pronoun: pronoun || undefined
+      })
+      typeText(generatedContent)
+      toast.success('Content generated successfully!')
+    } catch (error) {
+      console.error('Error:', error)
+      toast.error('Failed to generate content')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleSaveDraft = async () => {
+    if (!content) {
+      toast.error('No content to save')
+      return
+    }
+    try {
+      const token = await getToken()
+      if (!token) {
+        throw new Error('Not authenticated')
+      }
+      await savePost({ title: topic, content, style, token })
+      
+      // Refresh the posts list
+      const fetchedPosts = await fetchPosts({ token })
+      setPosts(fetchedPosts)
+      
+      toast.success('Draft saved successfully!')
+      setShowCreateModal(false)
+      // Reset form
+      setTopic('')
+      setStyle('')
+      setContent('')
+      setShowGeneratedContent(false)
+    } catch (error) {
+      console.error('Error saving draft:', error)
+      toast.error('Failed to save draft')
+    }
+  }
+
   const handleCreate = () => {
-    router.push('dashboard')
+    setShowCreateModal(true)
   }
 
   const handleDelete = async (postUuid: string) => {
@@ -118,7 +208,7 @@ function Posts() {
   }
 
   const generateLink = (publicId: string) => {
-    return `https://postcraft.ai/posts/${publicId}`
+    return `https://postcraft-ai.up.railway.app/posts/${publicId}`
   }
 
   const totalPages = Math.ceil(posts.length / postsPerPage)
@@ -142,6 +232,119 @@ function Posts() {
           Create New Post
         </Button>
       </div>
+
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Create New Post</DialogTitle>
+            <DialogDescription>Generate and save your new post</DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="topic" className="text-sm font-medium">Topic</label>
+              <Input
+                id="topic"
+                placeholder="e.g., Tech News in a Professional Tone"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="style" className="text-sm font-medium">Writing Style</label>
+              <Select value={style} onValueChange={setStyle}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Professional">Professional</SelectItem>
+                  <SelectItem value="Casual">Casual</SelectItem>
+                  <SelectItem value="Technical">Technical</SelectItem>
+                  <SelectItem value="Creative">Creative</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Collapsible
+              open={showSpecialRequests}
+              onOpenChange={setShowSpecialRequests}
+              className="space-y-2"
+            >
+              <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                <ChevronDown className={`w-4 h-4 transition-transform ${showSpecialRequests ? 'rotate-180' : ''}`} />
+                Special Requests
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pl-6">
+                <div className="space-y-2">
+                  <label htmlFor="wordLimit" className="text-sm font-medium">Word Limit</label>
+                  <Input
+                    id="wordLimit"
+                    type="number"
+                    placeholder="e.g., 500"
+                    value={wordLimit}
+                    onChange={(e) => setWordLimit(e.target.value)}
+                    className="w-full"
+                    min="1"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="pronoun" className="text-sm font-medium">Writing Perspective</label>
+                  <Select value={pronoun} onValueChange={(value: 'first' | 'second' | 'third') => setPronoun(value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select perspective" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="first">First Person (I, we)</SelectItem>
+                      <SelectItem value="second">Second Person (you)</SelectItem>
+                      <SelectItem value="third">Third Person (he, she, they)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90" 
+              onClick={handleGenerate}
+              disabled={isGenerating}
+            >
+              {isGenerating ? 'Generating...' : 'Generate Post'}
+            </Button>
+
+            {showGeneratedContent && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Generated Content</label>
+                  <div className="relative">
+                    <Textarea
+                      placeholder="Your generated content will appear here..."
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      className="min-h-[300px] max-h-[50vh] resize-none overflow-y-auto"
+                      disabled={isTyping}
+                    />
+                    {isTyping && (
+                      <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90" 
+                  onClick={handleSaveDraft}
+                  disabled={!content}
+                >
+                  Save Draft
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -273,28 +476,42 @@ function Posts() {
                         <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
                           {post.title}
                         </CardTitle>
-                        {post.isPublic && (
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
-                            onClick={() => {
-                              const link = generateLink(post.publicId);
-                              navigator.clipboard.writeText(link);
-                              toast.success('Link copied to clipboard!');
-                            }}
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {!post.isPublic && (
-                          <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                            {post.date}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                            post.isPublic 
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          }`}>
+                            {post.isPublic ? (
+                              <>
+                                <GlobeIcon className="w-3 h-3" />
+                                Published
+                              </>
+                            ) : (
+                              <>
+                                <LockIcon className="w-3 h-3" />
+                                Draft
+                              </>
+                            )}
+                          </div>
+                          {post.isPublic && (
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                              onClick={() => {
+                                const link = generateLink(post.publicId);
+                                navigator.clipboard.writeText(link);
+                                toast.success('Link copied to clipboard!');
+                              }}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <CardDescription className="text-xs mt-1">
-                        Style: {post.style}, Status: {post.isPublic ? 'Public' : 'Private'}
+                        Style: {post.style}
                       </CardDescription>
                     </CardHeader>
 
