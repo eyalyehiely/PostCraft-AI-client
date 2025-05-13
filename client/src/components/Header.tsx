@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 bg-card backdrop-blur-md border-b border-border w-full dark:bg-black">
-      <div className="px-4 h-16 flex items-center">
+      <div className="px-4 h-16 flex items-center justify-between">
         {/* Left side - Page Title */}
         <div className="flex items-center">
           <h1 className="text-lg font-bold text-foreground ml-12">

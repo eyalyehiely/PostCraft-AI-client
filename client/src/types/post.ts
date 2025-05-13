@@ -9,7 +9,11 @@ export interface Post {
   style: string
   isPublic: boolean
   author: {
-    name: string
+    _id: string
+    email: string
+    name?: string
+    first_name?: string
+    last_name?: string
     image?: string
   }
   createdAt: string
