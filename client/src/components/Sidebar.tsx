@@ -41,7 +41,7 @@ export function Sidebar() {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-[60] md:hidden p-2 rounded-lg bg-white shadow-md hover:bg-gray-100 transition-colors border border-gray-200"
+        className="fixed top-4 left-4 z-[60] md:hidden p-2 rounded-lg bg-white shadow-md hover:bg-gray-100 transition-colors border border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
         aria-label={isOpen ? "Close menu" : "Open menu"}
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -52,14 +52,14 @@ export function Sidebar() {
         {/* Overlay for mobile */}
         {isOpen && (
           <div
-            className="fixed top-0 left-0 w-64 h-screen bg-black bg-opacity-50 md:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm md:hidden z-40"
             onClick={() => setIsOpen(false)}
           />
         )}
 
         {/* Sidebar */}
         <aside
-          className={`fixed md:static w-64 border-r min-h-screen p-4 bg-white dark:bg-black transition-transform duration-300 ease-in-out ${
+          className={`fixed md:static w-64 border-r min-h-screen p-4 bg-white/95 dark:bg-gray-900/95 dark:border-gray-800 transition-transform duration-300 ease-in-out z-50 ${
             isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
           }`}
         >
