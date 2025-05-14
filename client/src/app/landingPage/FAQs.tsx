@@ -7,25 +7,23 @@ const FAQs = () => {
 
   const faqs = [
     {
-      question: "What is SEO Gen?",
-      answer: "SEO Gen is an AI-powered analytics platform that helps businesses analyze and optimize their website's performance. It provides detailed insights, recommendations, and tools to improve your website's SEO and user experience."
+      question: "What is PostCraft AI?",
+      answer: "PostCraft AI is an AI-powered social media content creation platform that helps creators and businesses generate engaging posts, captions, and content ideas. It provides scheduling tools, analytics, and multi-platform support to streamline your content strategy."
     },
     {
-      question: "How does the AI analysis work?",
-      answer: "Our AI system analyzes your website using advanced algorithms to identify performance issues, SEO opportunities, and user experience improvements. It processes data from various sources to provide comprehensive insights and actionable recommendations."
+      question: "How does the AI content generation work?",
+      answer: "Our AI system uses advanced algorithms to create content tailored to your brand voice and audience. Simply provide a topic or idea, and our AI will generate engaging posts, captions, and content suggestions optimized for different social media platforms."
+    },
+
+    {
+      question: "Is my content and data secure?",
+      answer: "Yes, we take data security very seriously. All your content and data is encrypted in transit and at rest. We follow industry best practices and comply with relevant data protection regulations to ensure your information remains secure."
     },
     {
-      question: "What kind of data do you analyze?",
-      answer: "We analyze various aspects of your website including Core Web Vitals, page load times, resource usage, SEO elements, accessibility features, and user experience metrics. This helps provide a complete picture of your website's performance."
+      question: "How often should I create new content?",
+      answer: "With PostCraft AI, you can maintain a consistent posting schedule easily. Our smart scheduling feature suggests optimal posting times, and you can create content in bulk. We recommend posting regularly based on your audience engagement patterns and platform best practices."
     },
-    {
-      question: "Is my data secure?",
-      answer: "Yes, we take data security very seriously. All data is encrypted in transit and at rest. We follow industry best practices and comply with relevant data protection regulations to ensure your data remains secure."
-    },
-    {
-      question: "How often should I run an analysis?",
-      answer: "We recommend running a full analysis at least once a month, or whenever you make significant changes to your website. Regular analysis helps track improvements and identify new opportunities for optimization."
-    }
+    
   ];
 
   return (

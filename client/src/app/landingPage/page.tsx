@@ -606,7 +606,7 @@ const LandingPage = () => {
               <ul className="space-y-2">
                 <li className="flex items-center text-gray-400 text-sm">
                   <EnvelopeIcon className="w-5 h-5 mr-2" />
-                  <span>support@seogen.co</span>
+                  <span>eyalwork0@gmail.com</span>
                 </li>
               </ul>
             </div>
