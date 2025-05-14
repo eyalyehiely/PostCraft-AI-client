@@ -263,6 +263,7 @@ function Posts() {
                   <SelectItem value="Casual">Casual</SelectItem>
                   <SelectItem value="Technical">Technical</SelectItem>
                   <SelectItem value="Creative">Creative</SelectItem>
+                  <SelectItem value="Funny">Funny</SelectItem>
                 </SelectContent>
               </Select>
             </div>

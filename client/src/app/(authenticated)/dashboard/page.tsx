@@ -114,10 +114,11 @@ export default function Dashboard() {
                   <SelectValue placeholder="Select a style" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="professional">Professional</SelectItem>
-                  <SelectItem value="casual">Casual</SelectItem>
-                  <SelectItem value="technical">Technical</SelectItem>
-                  <SelectItem value="creative">Creative</SelectItem>
+                  <SelectItem value="Professional">Professional</SelectItem>
+                  <SelectItem value="Casual">Casual</SelectItem>
+                  <SelectItem value="Technical">Technical</SelectItem>
+                  <SelectItem value="Creative">Creative</SelectItem>
+                  <SelectItem value="Funny">Funny</SelectItem>
                 </SelectContent>
               </Select>
             </div>
