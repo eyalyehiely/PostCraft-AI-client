@@ -77,7 +77,7 @@ export function Sidebar() {
             ))}
           </nav>
            {/* User Section */}
-        <div className="absolute bottom-16 left-0 right-0 p-4 border-t border-border">
+        <div className="md:absolute md:bottom-16 md:left-0 md:right-0 p-4 border-t border-border mt-8 md:mt-0">
           <div className="space-y-3">
             <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-accent/5">
               <UserButton afterSignOutUrl="/" />
