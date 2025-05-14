@@ -169,11 +169,17 @@ function Posts() {
       if (!token) {
         throw new Error('Not authenticated')
       }
-      await savePost({ title: topic, content, style, token })
+      const savedPost = await savePost({ title: topic, content, style, token })
       
-      // Refresh the posts list
-      const fetchedPosts = await fetchPosts({ token })
-      setPosts(fetchedPosts)
+      // Verify the post has a publicId
+      if (!savedPost.publicId) {
+        console.error('Post saved but no publicId was returned')
+        toast.error('Post saved but public URL is not available')
+        return
+      }
+
+      // Add the new post to the list
+      setPosts(prevPosts => [savedPost, ...prevPosts])
       
       toast.success('Draft saved successfully!')
       setShowCreateModal(false)
