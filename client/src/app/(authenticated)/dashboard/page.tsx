@@ -55,7 +55,13 @@ export default function Dashboard() {
         throw new Error('Not authenticated')
       }
       
-      const generatedContent = await generateContent({ topic, style, token })
+      const generatedContent = await generateContent({ 
+        topic, 
+        style, 
+        token,
+        wordLimit: wordLimit ? parseInt(wordLimit) : undefined,
+        pronoun: pronoun as 'first' | 'second' | 'third'
+      })
       typeText(generatedContent)
       toast.success('Content generated successfully!')
     } catch (error) {

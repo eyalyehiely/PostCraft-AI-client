@@ -240,7 +240,7 @@ function Posts() {
       </div>
 
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl max-h-[85vh] md:max-h-none overflow-y-auto translate-y-[-20vh] md:translate-y-0">
           <DialogHeader>
             <DialogTitle>Create New Post</DialogTitle>
             <DialogDescription>Generate and save your new post</DialogDescription>
