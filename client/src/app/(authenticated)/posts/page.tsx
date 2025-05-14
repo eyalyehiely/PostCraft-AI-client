@@ -98,9 +98,9 @@ function Posts() {
       if (!token) {
         throw new Error('Not authenticated')
       }
-      await editPost(editingPost.uuid, editingPost, token)
+      const updatedPost = await editPost(editingPost.uuid, editingPost, token)
       setPosts(posts.map(post => 
-        post.uuid === editingPost.uuid ? editingPost : post
+        post.uuid === editingPost.uuid ? updatedPost : post
       ))
       toast.success('Post updated successfully')
       handleCancelEdit()
@@ -171,13 +171,6 @@ function Posts() {
       }
       const savedPost = await savePost({ title: topic, content, style, token })
       
-      // Verify the post has a publicId
-      if (!savedPost.publicId) {
-        console.error('Post saved but no publicId was returned')
-        toast.error('Post saved but public URL is not available')
-        return
-      }
-
       // Add the new post to the list
       setPosts(prevPosts => [savedPost, ...prevPosts])
       
@@ -240,7 +233,7 @@ function Posts() {
       </div>
 
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-3xl max-h-[85vh] md:max-h-none overflow-y-auto translate-y-[-20vh] md:translate-y-0">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Post</DialogTitle>
             <DialogDescription>Generate and save your new post</DialogDescription>
@@ -418,6 +411,7 @@ function Posts() {
                             <SelectItem value="Professional">Professional</SelectItem>
                             <SelectItem value="Technical">Technical</SelectItem>
                             <SelectItem value="Casual">Casual</SelectItem>
+                            <SelectItem value="Funny">Funny</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
