@@ -10,6 +10,9 @@ import { toast } from 'sonner'
 import { generateContent } from '@/services/posts/generate'
 import { useAuth } from '@clerk/nextjs'
 import { savePost } from '@/services/posts/savePost'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-react'
+
 export default function Dashboard() {
   const [topic, setTopic] = useState('')
   const [style, setStyle] = useState('')
@@ -17,6 +20,9 @@ export default function Dashboard() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
   const [showGeneratedContent, setShowGeneratedContent] = useState(false)
+  const [showSpecialRequests, setShowSpecialRequests] = useState(false)
+  const [wordLimit, setWordLimit] = useState('')
+  const [pronoun, setPronoun] = useState<'first' | 'second' | 'third' | ''>('')
   const { getToken } = useAuth()
 
   const typeText = (text: string) => {
@@ -115,6 +121,44 @@ export default function Dashboard() {
                 </SelectContent>
               </Select>
             </div>
+            <Collapsible
+              open={showSpecialRequests}
+              onOpenChange={setShowSpecialRequests}
+              className="space-y-2"
+            >
+              <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                <ChevronDown className={`w-4 h-4 transition-transform ${showSpecialRequests ? 'rotate-180' : ''}`} />
+                Special Requests
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pl-6">
+                <div className="space-y-2">
+                  <label htmlFor="wordLimit" className="text-sm font-medium">Word Limit</label>
+                  <Input
+                    id="wordLimit"
+                    type="number"
+                    placeholder="e.g., 500"
+                    value={wordLimit}
+                    onChange={(e) => setWordLimit(e.target.value)}
+                    className="w-full"
+                    min="1"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="pronoun" className="text-sm font-medium">Writing Perspective</label>
+                  <Select value={pronoun} onValueChange={(value: 'first' | 'second' | 'third') => setPronoun(value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select perspective" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="first">First Person (I, we)</SelectItem>
+                      <SelectItem value="second">Second Person (you)</SelectItem>
+                      <SelectItem value="third">Third Person (he, she, they)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             <Button 
               className="w-full bg-primary hover:bg-primary/90" 
